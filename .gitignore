@@ -1,3 +1,6 @@
 node_modules/
 .env
 .claude/
+.tmp_prompt.txt
+output/blog/
+output/case-studies/

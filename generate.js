@@ -12,11 +12,64 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fetch from 'node-fetch';
+import archiver from 'archiver';
 import 'dotenv/config';
 
 const __dirname  = path.dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = path.join(__dirname, 'output');
 const TMPL_DIR   = path.join(__dirname, 'templates');
+
+// ── STRAPI V5 RICH TEXT → HTML ────────────────────────────────────────────────
+// Strapi v5 stores rich text as a JSON block array, not plain HTML.
+// This function converts it back to HTML for rendering.
+
+function blocksToHtml(blocks) {
+  if (!blocks) return '';
+  // If it's already a string, return as-is
+  if (typeof blocks === 'string') return blocks;
+  // If it's an array of blocks, convert each block
+  if (!Array.isArray(blocks)) return '';
+
+  return blocks.map(block => {
+    switch (block.type) {
+      case 'paragraph':
+        return `<p>${inlineToHtml(block.children)}</p>`;
+      case 'heading':
+        const level = block.level || 2;
+        const text = inlineToHtml(block.children);
+        const id = text.toLowerCase().replace(/<[^>]+>/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        return `<h${level} id="${id}">${text}</h${level}>`;
+      case 'list':
+        const tag = block.format === 'ordered' ? 'ol' : 'ul';
+        const items = (block.children || []).map(item => `<li>${inlineToHtml(item.children)}</li>`).join('');
+        return `<${tag}>${items}</${tag}>`;
+      case 'quote':
+        return `<blockquote>${inlineToHtml(block.children)}</blockquote>`;
+      case 'code':
+        return `<pre><code>${inlineToHtml(block.children)}</code></pre>`;
+      case 'image':
+        return block.image?.url ? `<img src="${block.image.url}" alt="${block.image.alternativeText || ''}" />` : '';
+      default:
+        return `<p>${inlineToHtml(block.children)}</p>`;
+    }
+  }).join('\n');
+}
+
+function inlineToHtml(children) {
+  if (!children) return '';
+  return children.map(child => {
+    if (child.type === 'link') {
+      return `<a href="${child.url}">${inlineToHtml(child.children)}</a>`;
+    }
+    let text = child.text || '';
+    if (child.bold)          text = `<strong>${text}</strong>`;
+    if (child.italic)        text = `<em>${text}</em>`;
+    if (child.underline)     text = `<u>${text}</u>`;
+    if (child.strikethrough) text = `<s>${text}</s>`;
+    if (child.code)          text = `<code>${text}</code>`;
+    return text;
+  }).join('');
+}
 
 const STRAPI_URL   = process.env.STRAPI_URL;
 const STRAPI_TOKEN = process.env.STRAPI_TOKEN;
@@ -80,7 +133,7 @@ function buildBlogPost(post) {
     .replace(/{{READ_TIME}}/g,     d.read_time || '5')
     .replace(/{{TAGS}}/g,          tags)
     .replace(/{{TOC}}/g,           toc)
-    .replace(/{{BODY}}/g,          d.body_html || `<p>${d.body || ''}</p>`)
+    .replace(/{{BODY}}/g,          blocksToHtml(d.body_html) || `<p>${d.body || ''}</p>`)
     .replace(/{{YEAR}}/g,          year);
 
   writeFile(`blog/${slug}.html`, html);
@@ -181,13 +234,13 @@ function buildCaseStudyPage(cs) {
     .replace(/{{SERVICE}}/g,         d.service || '')
     .replace(/{{TIMELINE}}/g,        d.timeline || '')
     .replace(/{{CHALLENGE_TITLE}}/g, d.challenge_title || 'The Challenge')
-    .replace(/{{CHALLENGE_BODY}}/g,  d.challenge_html || '')
+    .replace(/{{CHALLENGE_BODY}}/g,  blocksToHtml(d.challenge_html) || '')
     .replace(/{{SOLUTION_TITLE}}/g,  d.solution_title || 'Our Approach')
-    .replace(/{{SOLUTION_BODY}}/g,   d.solution_html || '')
+    .replace(/{{SOLUTION_BODY}}/g,   blocksToHtml(d.solution_html) || '')
     .replace(/{{TECH_TAGS}}/g,       techTags)
     .replace(/{{RESULTS_TITLE}}/g,   d.results_title || 'The Results')
     .replace(/{{RESULTS_CARDS}}/g,   resultsCards)
-    .replace(/{{RESULTS_BODY}}/g,    d.results_html || '')
+    .replace(/{{RESULTS_BODY}}/g,    blocksToHtml(d.results_html) || '')
     .replace(/{{TESTIMONIAL}}/g,     testimonial)
     .replace(/{{YEAR}}/g,            year);
 
@@ -263,8 +316,56 @@ async function main() {
   updateIndex(blogMeta, csMeta);
 
   console.log(`\n✨ Done! ${blogMeta.length} blog(s) + ${csMeta.length} case study(ies) generated.\n`);
-  console.log('   Output folder: output/');
-  console.log('   Upload the contents of output/ to your server to go live.\n');
+
+  // ── NETLIFY DEPLOY ──
+  const netlifyToken  = process.env.NETLIFY_AUTH_TOKEN;
+  const netlifySiteId = process.env.NETLIFY_SITE_ID;
+
+  if (netlifyToken && netlifySiteId) {
+    console.log('🚀 Deploying to Netlify...');
+    try {
+      await deployToNetlify(netlifyToken, netlifySiteId);
+      console.log('   ✅ Live on Netlify!\n');
+    } catch (e) {
+      console.warn('   ⚠️  Netlify deploy failed:', e.message);
+      console.log('   Output folder: output/ — deploy manually if needed.\n');
+    }
+  } else {
+    console.log('   Output folder: output/');
+    console.log('   (Add NETLIFY_AUTH_TOKEN + NETLIFY_SITE_ID to .env to auto-deploy)\n');
+  }
+}
+
+// ── NETLIFY DEPLOY ────────────────────────────────────────────────────────────
+
+function deployToNetlify(token, siteId) {
+  return new Promise((resolve, reject) => {
+    const zipChunks = [];
+    const archive   = archiver('zip', { zlib: { level: 6 } });
+
+    archive.on('data',    chunk => zipChunks.push(chunk));
+    archive.on('warning', err   => { if (err.code !== 'ENOENT') reject(err); });
+    archive.on('error',   err   => reject(err));
+    archive.on('end', async () => {
+      const zipBuffer = Buffer.concat(zipChunks);
+      const res = await fetch(`https://api.netlify.com/api/v1/sites/${siteId}/deploys`, {
+        method:  'POST',
+        headers: {
+          'Content-Type':   'application/zip',
+          'Authorization':  `Bearer ${token}`,
+        },
+        body: zipBuffer,
+      });
+      if (!res.ok) {
+        const txt = await res.text();
+        return reject(new Error(`Netlify API error (${res.status}): ${txt}`));
+      }
+      resolve(await res.json());
+    });
+
+    archive.directory(OUTPUT_DIR, false);
+    archive.finalize();
+  });
 }
 
 main().catch(err => {

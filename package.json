@@ -4,10 +4,13 @@
   "description": "Fintech blog site powered by Strapi Cloud",
   "type": "module",
   "scripts": {
-    "generate": "node generate.js"
+    "generate": "node generate.js",
+    "webapp": "node webapp.js"
   },
   "dependencies": {
-    "node-fetch": "^3.3.2",
-    "dotenv": "^16.4.5"
+    "archiver": "^7.0.1",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2"
   }
 }

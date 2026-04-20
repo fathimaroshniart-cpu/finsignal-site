@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinSignal — Content Creator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0e1a;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: #0d1220;
+      border-bottom: 1px solid #1e2a3a;
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    header h1 { font-size: 18px; font-weight: 700; color: #f1f5f9; }
+    header span { color: #64748b; font-size: 14px; margin-left: 8px; }
+
+    /* ── MAIN LAYOUT ── */
+    .container {
+      max-width: 860px;
+      margin: 48px auto;
+      padding: 0 24px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+    }
+    .page-sub {
+      color: #64748b;
+      font-size: 15px;
+      margin-bottom: 40px;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: #0d1220;
+      border: 1px solid #1e2a3a;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #3b82f6;
+      margin-bottom: 20px;
+    }
+
+    /* ── TYPE SELECTOR ── */
+    .type-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .type-btn {
+      background: #111827;
+      border: 2px solid #1e2a3a;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      color: #94a3b8;
+    }
+    .type-btn:hover { border-color: #3b82f6; color: #e2e8f0; }
+    .type-btn.active {
+      border-color: #3b82f6;
+      background: rgba(59,130,246,0.08);
+      color: #e2e8f0;
+    }
+    .type-btn .icon { font-size: 24px; margin-bottom: 8px; }
+    .type-btn .label { font-weight: 600; font-size: 15px; }
+    .type-btn .desc { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .type-btn.active .desc { color: #94a3b8; }
+
+    /* ── FORM FIELDS ── */
+    .field { margin-bottom: 20px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    label .hint {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #475569;
+      margin-left: 6px;
+      font-size: 12px;
+    }
+    textarea, input, select {
+      width: 100%;
+      background: #111827;
+      border: 1px solid #1e2a3a;
+      border-radius: 10px;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-family: inherit;
+      padding: 12px 14px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    textarea:focus, input:focus, select:focus { border-color: #3b82f6; }
+    textarea { resize: vertical; min-height: 180px; line-height: 1.6; }
+    select option { background: #111827; }
+    ::placeholder { color: #334155; }
+
+    /* ── FIELDS GRID ── */
+    .fields-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* ── BLOG-ONLY / CASE-ONLY FIELDS ── */
+    .blog-fields, .cs-fields { display: none; }
+    .blog-fields.show, .cs-fields.show { display: block; }
+
+    /* ── SUBMIT BUTTON ── */
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      margin-top: 8px;
+    }
+    .submit-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── LOADING ── */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .loading.show { display: block; }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid #1e2a3a;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-title { font-size: 18px; font-weight: 600; color: #f1f5f9; margin-bottom: 8px; }
+    .loading-sub { color: #64748b; font-size: 14px; }
+    .loading-steps { margin-top: 24px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto; }
+    .step {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #1e2a3a;
+      font-size: 14px;
+      color: #475569;
+    }
+    .step.done { color: #94a3b8; }
+    .step.active { color: #3b82f6; }
+    .step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #1e2a3a;
+      flex-shrink: 0;
+    }
+    .step.done .step-dot { background: #22c55e; }
+    .step.active .step-dot { background: #3b82f6; animation: pulse 1s ease infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+    /* ── SUCCESS ── */
+    .success {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .success.show { display: block; }
+    .success-icon { font-size: 56px; margin-bottom: 16px; }
+    .success-title { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-bottom: 8px; }
+    .success-sub { color: #64748b; font-size: 15px; margin-bottom: 32px; }
+    .result-card {
+      background: #111827;
+      border: 1px solid #1e2a3a;
+      border-radius: 12px;
+      padding: 20px 24px;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .result-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+    .result-key { color: #64748b; }
+    .result-val { color: #e2e8f0; font-weight: 500; }
+    .result-val.tag {
+      background: rgba(59,130,246,0.15);
+      color: #60a5fa;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+    }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #1e2a3a; }
+    .btn-outline:hover { border-color: #3b82f6; color: #e2e8f0; }
+
+    /* ── ERROR ── */
+    .error-box {
+      display: none;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px;
+      padding: 16px;
+      color: #fca5a5;
+      font-size: 14px;
+      margin-top: 16px;
+    }
+    .error-box.show { display: block; }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: #111827;
+      border: 1px solid #1e2a3a;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 13px;
+      color: #64748b;
+      display: none;
+    }
+    .status-bar.show { display: flex; align-items: center; gap: 8px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+
+    @media (max-width: 600px) {
+      .fields-grid, .type-grid { grid-template-columns: 1fr; }
+      .container { padding: 0 16px; }
+      header { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📡</div>
+  <h1>FinSignal</h1>
+  <span>Content Creator</span>
+</header>
+
+<div class="container">
+  <div class="page-title">Create Content</div>
+  <div class="page-sub">Paste your raw content, answer a few questions, and we'll handle the rest.</div>
+
+  <!-- FORM -->
+  <div id="formView">
+
+    <!-- Step 1: Content Type -->
+    <div class="card">
+      <div class="card-title">Step 1 — Content Type</div>
+      <div class="type-grid">
+        <button class="type-btn active" onclick="setType('blog', this)">
+          <div class="icon">📝</div>
+          <div class="label">Blog Post</div>
+          <div class="desc">Articles, insights, guides, opinions</div>
+        </button>
+        <button class="type-btn" onclick="setType('case-study', this)">
+          <div class="icon">📊</div>
+          <div class="label">Case Study</div>
+          <div class="desc">Client work, outcomes, results</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Raw Content -->
+    <div class="card">
+      <div class="card-title">Step 2 — Your Content</div>
+      <div class="field">
+        <label>Paste your content <span class="hint">notes, Google Doc paste, bullet points — anything works</span></label>
+        <textarea id="content" placeholder="Paste your raw content here...&#10;&#10;It can be rough notes, a draft article, bullet points, or a full write-up. The AI will structure and expand it into a polished piece."></textarea>
+      </div>
+    </div>
+
+    <!-- Step 3: Blog Questions -->
+    <div class="card blog-fields show" id="blogFields">
+      <div class="card-title">Step 3 — Blog Details</div>
+      <div class="fields-grid">
+        <div class="field">
+          <label>Tone</label>
+          <select id="tone">
+            <option value="Technical">Technical — for developers & engineers</option>
+            <option value="Strategic">Strategic — for CTOs & executives</option>
+            <option value="Educational">Educational — general fintech audience</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Target Audience <span class="hint">optional</span></label>
+          <input type="text" id="audience" placeholder="e.g. Fintech CTOs, developers" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Keywords to Target <span class="hint">comma separated, optional</span></label>
+        <input type="text" id="keywords" placeholder="e.g. AI banking, core banking modernisation, payments infrastructure" />
+      </div>
+      <div class="field">
+        <label>Additional Notes <span class="hint">optional</span></label>
+        <input type="text" id="notes" placeholder="Any specific angle, sections to include, or things to avoid..." />
+      </div>
+    </div>
+
+    <!-- Step 3: Case Study Questions -->
+    <div class="card cs-fields" id="csFields">
+      <div class="card-title">Step 3 — Case Study Details</div>
+      <div class="fields-grid">
+        <div class="field">
+          <label>Client Type <span class="hint">keep confidential if needed</span></label>
+          <input type="text" id="clientType" placeholder="e.g. European Neobank, UK Payment Provider" />
+        </div>
+        <div class="field">
+          <label>Key Outcome <span class="hint">what to highlight</span></label>
+          <input type="text" id="outcome" placeholder="e.g. 3x faster deployments, 60% cost reduction" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Keywords to Target <span class="hint">comma separated, optional</span></label>
+        <input type="text" id="csKeywords" placeholder="e.g. fintech modernisation, cloud migration, payments infrastructure" />
+      </div>
+      <div class="field">
+        <label>Additional Notes <span class="hint">optional</span></label>
+        <input type="text" id="csNotes" placeholder="Any specific details to include..." />
+      </div>
+    </div>
+
+    <div id="errorBox" class="error-box"></div>
+    <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
+      ✨ Generate &amp; Publish
+    </button>
+
+  </div>
+
+  <!-- LOADING -->
+  <div id="loadingView" class="card loading">
+    <div class="spinner"></div>
+    <div class="loading-title">Generating your content...</div>
+    <div class="loading-sub">This takes about 30–60 seconds</div>
+    <div class="loading-steps">
+      <div class="step active" id="step1"><div class="step-dot"></div> Sending to AI</div>
+      <div class="step" id="step2"><div class="step-dot"></div> Writing article</div>
+      <div class="step" id="step3"><div class="step-dot"></div> Uploading to Strapi</div>
+      <div class="step" id="step4"><div class="step-dot"></div> Rebuilding site</div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="successView" class="card success">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Content Published!</div>
+    <div class="success-sub">Your content has been uploaded to Strapi and the site has been rebuilt.</div>
+    <div class="result-card" id="resultCard"></div>
+    <div class="btn-row">
+      <a href="output/index.html" class="btn btn-primary" id="viewSiteBtn" target="_blank">View Site →</a>
+      <button class="btn btn-outline" onclick="resetForm()">Create Another</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Status bar -->
+<div class="status-bar" id="statusBar">
+  <div class="status-dot"></div>
+  <span id="statusText">Connected to Strapi</span>
+</div>
+
+<script>
+  let currentType = 'blog';
+
+  // ── Type toggle ──
+  function setType(type, btn) {
+    currentType = type;
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('blogFields').classList.toggle('show', type === 'blog');
+    document.getElementById('csFields').classList.toggle('show', type === 'case-study');
+  }
+
+  // ── Check health on load ──
+  async function checkHealth() {
+    try {
+      const res = await fetch('/api/health');
+      const json = await res.json();
+      const bar = document.getElementById('statusBar');
+      const txt = document.getElementById('statusText');
+      if (json.ok && json.strapi && json.groq) {
+        txt.textContent = 'Ready — Strapi & Groq connected';
+        bar.classList.add('show');
+        setTimeout(() => bar.classList.remove('show'), 4000);
+      } else {
+        txt.textContent = 'Warning: check .env config';
+        bar.style.borderColor = 'rgba(239,68,68,0.3)';
+        bar.querySelector('.status-dot').style.background = '#ef4444';
+        bar.classList.add('show');
+      }
+    } catch {}
+  }
+
+  // ── Animate loading steps ──
+  function animateSteps() {
+    const steps = ['step1','step2','step3','step4'];
+    const delays = [0, 8000, 22000, 35000];
+    steps.forEach((id, i) => {
+      setTimeout(() => {
+        if (i > 0) document.getElementById(steps[i-1]).className = 'step done';
+        document.getElementById(id).className = 'step active';
+      }, delays[i]);
+    });
+  }
+
+  // ── Submit ──
+  async function handleSubmit() {
+    const content = document.getElementById('content').value.trim();
+    if (!content) {
+      showError('Please paste some content first.');
+      return;
+    }
+
+    // Build payload
+    const payload = { type: currentType, content };
+    if (currentType === 'blog') {
+      payload.tone     = document.getElementById('tone').value;
+      payload.audience = document.getElementById('audience').value;
+      payload.keywords = document.getElementById('keywords').value;
+      payload.notes    = document.getElementById('notes').value;
+    } else {
+      payload.clientType = document.getElementById('clientType').value;
+      payload.outcome    = document.getElementById('outcome').value;
+      payload.keywords   = document.getElementById('csKeywords').value;
+      payload.notes      = document.getElementById('csNotes').value;
+    }
+
+    // Show loading
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('loadingView').classList.add('show');
+    animateSteps();
+
+    try {
+      const res = await fetch('/api/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+
+      if (!res.ok || json.error) {
+        throw new Error(json.error || 'Something went wrong');
+      }
+
+      // Mark all steps done
+      ['step1','step2','step3','step4'].forEach(id => {
+        document.getElementById(id).className = 'step done';
+      });
+
+      setTimeout(() => showSuccess(json), 600);
+
+    } catch (e) {
+      document.getElementById('loadingView').classList.remove('show');
+      document.getElementById('formView').style.display = 'block';
+      showError(e.message);
+    }
+  }
+
+  // ── Show success ──
+  function showSuccess(data) {
+    document.getElementById('loadingView').classList.remove('show');
+
+    const slug = data.type === 'blog'
+      ? `blog/${data.slug}.html`
+      : `case-studies/${data.slug}.html`;
+
+    document.getElementById('resultCard').innerHTML = `
+      <div class="result-row"><span class="result-key">Title</span><span class="result-val">${data.title}</span></div>
+      <div class="result-row"><span class="result-key">Slug</span><span class="result-val">${data.slug}</span></div>
+      <div class="result-row"><span class="result-key">Type</span><span class="result-val tag">${data.type}</span></div>
+      <div class="result-row"><span class="result-key">Category</span><span class="result-val">${data.category}</span></div>
+      <div class="result-row"><span class="result-key">Strapi ID</span><span class="result-val">#${data.id}</span></div>
+    `;
+
+    document.getElementById('viewSiteBtn').href = `output/${slug}`;
+    document.getElementById('successView').classList.add('show');
+  }
+
+  // ── Show error ──
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = '❌ ' + msg;
+    box.classList.add('show');
+    setTimeout(() => box.classList.remove('show'), 8000);
+  }
+
+  // ── Reset ──
+  function resetForm() {
+    document.getElementById('successView').classList.remove('show');
+    document.getElementById('formView').style.display = 'block';
+    document.getElementById('content').value = '';
+    document.getElementById('errorBox').classList.remove('show');
+    ['step1','step2','step3','step4'].forEach((id, i) => {
+      document.getElementById(id).className = i === 0 ? 'step active' : 'step';
+    });
+  }
+
+  checkHealth();
+</script>
+</body>
+</html>
