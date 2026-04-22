@@ -147,9 +147,11 @@ function buildBlogCard(post, isFeatured = false) {
     return `
     <div class="featured-post">
       <div class="featured-image">
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="0.8">
-          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-        </svg>
+        <div class="featured-image-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
       </div>
       <div class="featured-content">
         <span class="post-category">${post.category}</span>
@@ -168,9 +170,11 @@ function buildBlogCard(post, isFeatured = false) {
   return `
     <a href="blog/${post.slug}.html" class="post-card">
       <div class="card-image">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1">
-          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
-        </svg>
+        <div class="card-image-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
         <div class="card-image-label"><span class="post-category">${post.category}</span></div>
       </div>
       <div class="card-body">
@@ -256,24 +260,23 @@ function updateIndex(blogCards, csCards) {
   const indexPath = path.join(OUTPUT_DIR, 'index.html');
   let html = fs.readFileSync(indexPath, 'utf8');
 
-  // Replace featured post + grid
+  // Use comment markers for reliable replacement
   if (blogCards.length > 0) {
     const featured = buildBlogCard(blogCards[0], true);
     const grid = blogCards.slice(1).map(p => buildBlogCard(p, false)).join('\n');
 
     html = html
-      .replace(/<div id="featured-post">[\s\S]*?<\/div>/,
-        `<div id="featured-post">${featured}</div>`)
-      .replace(/<div class="posts-grid" id="posts-grid"><\/div>/,
-        `<div class="posts-grid" id="posts-grid">${grid}</div>`);
+      .replace(/<!-- FEATURED_START -->[\s\S]*?<!-- FEATURED_END -->/,
+        `<!-- FEATURED_START -->${featured}<!-- FEATURED_END -->`)
+      .replace(/<!-- GRID_START -->[\s\S]*?<!-- GRID_END -->/,
+        `<!-- GRID_START -->${grid}<!-- GRID_END -->`);
   }
 
-  // Replace case studies grid
   if (csCards.length > 0) {
     const csGrid = csCards.map(cs => buildCaseStudyCard(cs)).join('\n');
     html = html.replace(
-      /<div class="cs-grid" id="cs-grid">[\s\S]*?<\/div>/,
-      `<div class="cs-grid" id="cs-grid">${csGrid}</div>`
+      /<!-- CS_START -->[\s\S]*?<!-- CS_END -->/,
+      `<!-- CS_START -->${csGrid}<!-- CS_END -->`
     );
   }
 
