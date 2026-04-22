@@ -39,10 +39,10 @@ async function askGroq(prompt) {
       'Authorization': `Bearer ${GROQ_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
+      model: 'gemma2-9b-it',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
-      max_tokens: 6000,
+      max_tokens: 4000,
     }),
   });
 
