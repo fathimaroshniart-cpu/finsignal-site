@@ -32,34 +32,47 @@ app.use('/output', express.static(path.join(__dirname, 'output')));
 // ── GROQ API ──────────────────────────────────────────────────────────────────
 
 async function askGroq(prompt) {
-  const apiKey = process.env.OPENROUTER_API_KEY || GROQ_API_KEY;
-  const isOpenRouter = !!process.env.OPENROUTER_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
 
-  const res = await fetch(
-    isOpenRouter
-      ? 'https://openrouter.ai/api/v1/chat/completions'
-      : 'https://api.groq.com/openai/v1/chat/completions',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        ...(isOpenRouter ? { 'HTTP-Referer': 'https://finsignal.app' } : {}),
-      },
-      body: JSON.stringify({
-        model: isOpenRouter ? 'meta-llama/llama-3.3-70b-instruct:free' : 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 4000,
-      }),
+  if (geminiKey) {
+    // Use Google Gemini API (free, 1M tokens/day)
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 4000 },
+        }),
+      }
+    );
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Gemini API error (${res.status}): ${err}`);
     }
-  );
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`AI API error (${res.status}): ${err}`);
+    const json = await res.json();
+    return json.candidates[0].content.parts[0].text.trim();
   }
 
+  // Fallback to Groq
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 4000,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Groq API error (${res.status}): ${err}`);
+  }
   const json = await res.json();
   return json.choices[0].message.content.trim();
 }
