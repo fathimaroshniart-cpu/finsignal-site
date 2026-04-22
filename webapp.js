@@ -42,7 +42,7 @@ async function askGroq(prompt) {
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
-      max_tokens: 16000,
+      max_tokens: 6000,
     }),
   });
 
