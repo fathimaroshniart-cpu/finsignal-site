@@ -142,16 +142,29 @@ function buildBlogPost(post) {
 
 // ── BUILD BLOG CARD HTML ──────────────────────────────────────────────────────
 
+// ── CATEGORY IMAGE MAP ────────────────────────────────────────────────────────
+const CATEGORY_IMAGES = {
+  'AI Engineering':        'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80',
+  'Fintech':               'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80',
+  'Legacy Modernisation':  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&q=80',
+  'AI Governance':         'https://images.unsplash.com/photo-1589254065878-42c9da997008?w=800&q=80',
+  'Engineering':           'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=800&q=80',
+  'Payments':              'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
+  'default':               'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80',
+};
+
+function getCategoryImage(category) {
+  return CATEGORY_IMAGES[category] || CATEGORY_IMAGES['default'];
+}
+
 function buildBlogCard(post, isFeatured = false) {
+  const imgUrl = getCategoryImage(post.category);
+
   if (isFeatured) {
     return `
     <div class="featured-post">
-      <div class="featured-image">
-        <div class="featured-image-icon">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-          </svg>
-        </div>
+      <div class="featured-image" style="background-image:url('${imgUrl}'); background-size:cover; background-position:center;">
+        <div class="featured-image-overlay"></div>
       </div>
       <div class="featured-content">
         <span class="post-category">${post.category}</span>
@@ -169,12 +182,8 @@ function buildBlogCard(post, isFeatured = false) {
 
   return `
     <a href="blog/${post.slug}.html" class="post-card">
-      <div class="card-image">
-        <div class="card-image-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-          </svg>
-        </div>
+      <div class="card-image" style="background-image:url('${imgUrl}'); background-size:cover; background-position:center;">
+        <div class="card-image-overlay"></div>
         <div class="card-image-label"><span class="post-category">${post.category}</span></div>
       </div>
       <div class="card-body">

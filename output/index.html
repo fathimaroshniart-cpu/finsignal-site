@@ -149,24 +149,9 @@
       min-height: 380px; display: flex; align-items: center; justify-content: center;
       position: relative; overflow: hidden;
     }
-    .featured-image::before {
-      content: '';
+    .featured-image-overlay {
       position: absolute; inset: 0;
-      background-image: radial-gradient(rgba(59,130,246,0.12) 1px, transparent 1px);
-      background-size: 24px 24px;
-    }
-    .featured-image::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(99,102,241,0.1) 50%, transparent 100%);
-    }
-    .featured-image-icon {
-      position: relative; z-index: 1;
-      width: 80px; height: 80px;
-      background: rgba(59,130,246,0.15);
-      border: 1px solid rgba(59,130,246,0.3);
-      border-radius: 20px;
-      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, rgba(10,15,30,0.5) 0%, rgba(10,15,30,0.2) 100%);
     }
     .featured-content { padding: 48px 44px; display: flex; flex-direction: column; justify-content: center; }
     .post-category {
@@ -200,19 +185,9 @@
       display: flex; align-items: center; justify-content: center;
       position: relative; overflow: hidden;
     }
-    .card-image::before {
-      content: '';
+    .card-image-overlay {
       position: absolute; inset: 0;
-      background-image: radial-gradient(rgba(59,130,246,0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
-    .card-image-icon {
-      position: relative; z-index: 1;
-      width: 48px; height: 48px;
-      background: rgba(59,130,246,0.12);
-      border: 1px solid rgba(59,130,246,0.25);
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(to bottom, rgba(10,15,30,0.1) 0%, rgba(10,15,30,0.4) 100%);
     }
     .card-image-label { position: absolute; bottom: 12px; left: 12px; z-index: 1; }
     .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
@@ -401,12 +376,26 @@
     <p class="section-label">Latest Articles</p>
 
     <!-- FEATURED_START -->
-    <div class="empty-state">
-      <div class="empty-state-icon">📝</div>
-      <h3>No articles yet</h3>
-      <p>Articles will appear here once published.</p>
-    </div>
-    <!-- FEATURED_END -->
+    <div class="featured-post">
+      <div class="featured-image">
+        <div class="featured-image-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="featured-content">
+        <span class="post-category">AI Engineering</span>
+        <h2>The Rise of AI in Core Banking: What Every Fintech CTO Needs to Know</h2>
+        <p>The financial industry is undergoing a significant transformation with the integration of AI in core banking. Fintech CTOs need to understand the impact of AI on fraud detection, hyper-personalisation, and operations. This article explores the current state of AI in banking and provides guidance on how to get started with AI implementation.</p>
+        <div class="post-meta">
+          <span>22 April 2026</span>
+          <span class="sep"></span>
+          <span>5 min read</span>
+        </div>
+        <a href="blog/the-rise-of-ai-in-core-banking.html" class="read-more">Read article →</a>
+      </div>
+    </div><!-- FEATURED_END -->
 
     <!-- GRID_START --><!-- GRID_END -->
   </section>
@@ -422,12 +411,12 @@
       </div>
       <div class="cs-grid" id="cs-grid">
         <!-- CS_START -->
-        <div class="empty-state">
-          <div class="empty-state-icon">📊</div>
-          <h3>No case studies yet</h3>
-          <p>Case studies will appear here once published.</p>
-        </div>
-        <!-- CS_END -->
+    <a href="case-studies/european-neobank-reduces-fraud-losses-by-60.html" class="cs-card">
+      <span class="cs-tag">Fintech, Banking, Payments</span>
+      <h3>60% Reduction in Fraud Losses for European Neobank</h3>
+      <p>European Neobank achieves 60% reduction in fraud losses using ML-based detection</p>
+      <div><div class="cs-stat">60%</div><div class="cs-stat-label">Reduction in Fraud Losses</div></div>
+    </a><!-- CS_END -->
       </div>
     </div>
   </section>
