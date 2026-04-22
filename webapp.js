@@ -32,23 +32,32 @@ app.use('/output', express.static(path.join(__dirname, 'output')));
 // ── GROQ API ──────────────────────────────────────────────────────────────────
 
 async function askGroq(prompt) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${GROQ_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7,
-      max_tokens: 4000,
-    }),
-  });
+  const apiKey = process.env.OPENROUTER_API_KEY || GROQ_API_KEY;
+  const isOpenRouter = !!process.env.OPENROUTER_API_KEY;
+
+  const res = await fetch(
+    isOpenRouter
+      ? 'https://openrouter.ai/api/v1/chat/completions'
+      : 'https://api.groq.com/openai/v1/chat/completions',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        ...(isOpenRouter ? { 'HTTP-Referer': 'https://finsignal.app' } : {}),
+      },
+      body: JSON.stringify({
+        model: isOpenRouter ? 'meta-llama/llama-3.3-70b-instruct:free' : 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 4000,
+      }),
+    }
+  );
 
   if (!res.ok) {
     const err = await res.text();
-    throw new Error(`Groq API error (${res.status}): ${err}`);
+    throw new Error(`AI API error (${res.status}): ${err}`);
   }
 
   const json = await res.json();
