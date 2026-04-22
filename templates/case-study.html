@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{SEO_TITLE}} | Panasa Technology</title>
+  <meta name="description" content="{{SEO_DESCRIPTION}}" />
+  <meta property="og:title" content="{{SEO_TITLE}}" />
+  <meta property="og:description" content="{{SEO_DESCRIPTION}}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://www.panasatech.com/case-studies/{{SLUG}}" />
+  <link rel="canonical" href="https://www.panasatech.com/case-studies/{{SLUG}}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0a0f1e;
+      --navy-light: #111827;
+      --navy-card: #141c2f;
+      --accent: #3b82f6;
+      --accent-light: #60a5fa;
+      --green: #10b981;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: rgba(255,255,255,0.08);
+      --font: 'Inter', -apple-system, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--navy);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10, 15, 30, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-weight: 700; font-size: 18px; color: var(--text); text-decoration: none; letter-spacing: -0.02em; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta { background: var(--accent); color: white; padding: 8px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s; }
+    .nav-cta:hover { background: var(--accent-light); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(180deg, #0d1628 0%, var(--navy) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 80px 40px 64px;
+    }
+    .hero-inner { max-width: 900px; margin: 0 auto; }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399; padding: 6px 16px; border-radius: 100px;
+      font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; margin-bottom: 24px;
+    }
+    .hero-tag span { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -0.03em; margin-bottom: 20px;
+    }
+    .hero-subtitle { font-size: 18px; color: var(--text-muted); max-width: 620px; margin-bottom: 40px; }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: flex; gap: 40px; flex-wrap: wrap;
+      padding: 32px 0; border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+    .stat-item { }
+    .stat-value { font-size: 36px; font-weight: 800; letter-spacing: -0.03em; color: var(--accent-light); }
+    .stat-label { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── CLIENT INFO CARD ── */
+    .client-bar {
+      max-width: 900px; margin: 48px auto; padding: 0 40px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+    }
+    .client-bar-item {
+      background: var(--navy-card); padding: 24px;
+    }
+    .client-bar-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+    .client-bar-value { font-size: 15px; font-weight: 600; color: var(--text); }
+
+    /* ── CONTENT ── */
+    .content-wrapper {
+      max-width: 900px; margin: 0 auto;
+      padding: 64px 40px 96px;
+    }
+
+    .section { margin-bottom: 64px; }
+    .section-label {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--accent-light);
+      margin-bottom: 16px;
+    }
+    .section h2 {
+      font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+      color: var(--text); margin-bottom: 16px;
+    }
+    .section p {
+      font-size: 17px; color: var(--text-muted); line-height: 1.8; margin-bottom: 16px;
+    }
+    .section ul {
+      list-style: none; margin: 16px 0;
+    }
+    .section ul li {
+      font-size: 17px; color: var(--text-muted); line-height: 1.7;
+      padding: 10px 0 10px 28px; position: relative;
+      border-bottom: 1px solid var(--border);
+    }
+    .section ul li:last-child { border-bottom: none; }
+    .section ul li::before {
+      content: '';
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .section strong { color: var(--text); font-weight: 600; }
+
+    /* ── CHALLENGE / SOLUTION CARDS ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 32px 0; }
+    .info-card {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px;
+    }
+    .info-card-icon { font-size: 24px; margin-bottom: 12px; }
+    .info-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+    .info-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 0; }
+
+    /* ── TECH STACK TAGS ── */
+    .tech-tags { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .tech-tag {
+      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2);
+      color: var(--accent-light); padding: 6px 14px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+    }
+
+    /* ── RESULTS HIGHLIGHT ── */
+    .results-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px; margin: 32px 0;
+    }
+    .result-card {
+      background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05));
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 16px; padding: 28px; text-align: center;
+    }
+    .result-card .number { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; color: #34d399; }
+    .result-card .label { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ── QUOTE ── */
+    .testimonial {
+      background: var(--navy-card); border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 16px 16px 0; padding: 32px;
+      margin: 48px 0;
+    }
+    .testimonial blockquote { font-size: 19px; line-height: 1.6; font-style: italic; color: var(--text); margin-bottom: 16px; }
+    .testimonial cite { font-size: 14px; color: var(--text-muted); font-style: normal; font-weight: 600; }
+
+    /* ── CTA BANNER ── */
+    .cta-banner {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f1f3d 100%);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 20px; padding: 64px;
+      text-align: center; margin-bottom: 96px;
+    }
+    .cta-banner h2 { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .cta-banner p { color: var(--text-muted); font-size: 17px; margin-bottom: 32px; }
+    .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { background: var(--accent); color: white; padding: 14px 32px; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--accent-light); }
+    .btn-secondary { background: transparent; color: var(--text); padding: 14px 32px; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; border: 1px solid var(--border); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--navy-light); border-top: 1px solid var(--border);
+      padding: 48px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 24px;
+    }
+    .footer-logo { font-weight: 700; font-size: 18px; letter-spacing: -0.02em; }
+    .footer-links { display: flex; gap: 32px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy { color: var(--text-muted); font-size: 13px; }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 48px 20px 40px; }
+      .client-bar { margin: 24px 20px; }
+      .content-wrapper { padding: 40px 20px 64px; }
+      .two-col { grid-template-columns: 1fr; }
+      .cta-banner { padding: 40px 24px; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="https://www.panasatech.com" class="nav-logo">Panasa Technology</a>
+    <ul class="nav-links">
+      <li><a href="https://www.panasatech.com/#about">About Us</a></li>
+      <li><a href="https://www.panasatech.com/#services">Services</a></li>
+      <li><a href="https://www.panasatech.com/#case-studies">Case Studies</a></li>
+      <li><a href="https://www.panasatech.com/blog">Blog</a></li>
+    </ul>
+    <a href="https://www.panasatech.com/contact.html" class="nav-cta">Contact Us</a>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-tag"><span></span>Case Study</div>
+      <h1>{{TITLE}}</h1>
+      <p class="hero-subtitle">{{SUBTITLE}}</p>
+
+      <!-- KEY STATS -->
+      <div class="stats-row">
+        {{STATS}}
+      </div>
+    </div>
+  </header>
+
+  <!-- CLIENT INFO BAR -->
+  <div class="client-bar">
+    <div class="client-bar-item">
+      <div class="client-bar-label">Client</div>
+      <div class="client-bar-value">{{CLIENT_NAME}}</div>
+    </div>
+    <div class="client-bar-item">
+      <div class="client-bar-label">Industry</div>
+      <div class="client-bar-value">{{INDUSTRY}}</div>
+    </div>
+    <div class="client-bar-item">
+      <div class="client-bar-label">Service</div>
+      <div class="client-bar-value">{{SERVICE}}</div>
+    </div>
+    <div class="client-bar-item">
+      <div class="client-bar-label">Timeline</div>
+      <div class="client-bar-value">{{TIMELINE}}</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="content-wrapper">
+
+    <!-- CHALLENGE -->
+    <div class="section">
+      <p class="section-label">The Challenge</p>
+      <h2>{{CHALLENGE_TITLE}}</h2>
+      {{CHALLENGE_BODY}}
+    </div>
+
+    <!-- SOLUTION -->
+    <div class="section">
+      <p class="section-label">Our Approach</p>
+      <h2>{{SOLUTION_TITLE}}</h2>
+      {{SOLUTION_BODY}}
+    </div>
+
+    <!-- TECH STACK -->
+    <div class="section">
+      <p class="section-label">Technology</p>
+      <h2>Tech Stack</h2>
+      <div class="tech-tags">{{TECH_TAGS}}</div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="section">
+      <p class="section-label">The Results</p>
+      <h2>{{RESULTS_TITLE}}</h2>
+      <div class="results-grid">{{RESULTS_CARDS}}</div>
+      {{RESULTS_BODY}}
+    </div>
+
+    <!-- TESTIMONIAL (optional) -->
+    {{TESTIMONIAL}}
+
+    <!-- CTA -->
+    <div class="cta-banner">
+      <h2>Ready to achieve similar results?</h2>
+      <p>Let's talk about how Panasa can help your fintech ship and scale faster.</p>
+      <div class="btn-group">
+        <a href="https://www.panasatech.com/contact.html" class="btn-primary">Get in touch</a>
+        <a href="https://www.panasatech.com/#case-studies" class="btn-secondary">More case studies</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Panasa Technology</div>
+    <div class="footer-links">
+      <a href="https://www.panasatech.com/about.html">About</a>
+      <a href="https://www.panasatech.com/#services">Services</a>
+      <a href="https://www.panasatech.com/careers.html">Careers</a>
+      <a href="https://www.panasatech.com/contact.html">Contact</a>
+      <a href="https://www.panasatech.com/privacy-policy.html">Privacy</a>
+    </div>
+    <div class="footer-copy">© {{YEAR}} Panasa Technology. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>

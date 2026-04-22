@@ -219,8 +219,7 @@ function buildCaseStudyPage(cs) {
     ? `<div class="testimonial"><blockquote>"${d.testimonial.quote}"</blockquote><cite>— ${d.testimonial.attribution}</cite></div>`
     : '';
 
-  // Use the panasa-cms case study template as base
-  const template = fs.readFileSync(path.join(__dirname, '..', 'panasa-cms', 'templates', 'case-study.html'), 'utf8');
+  const template = readTemplate('case-study.html');
 
   const html = template
     .replace(/{{SEO_TITLE}}/g,       d.seo_title || d.title)
