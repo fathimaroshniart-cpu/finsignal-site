@@ -56,11 +56,12 @@ async function askGroq(prompt) {
 }
 
 // ── BUILD PROMPTS ─────────────────────────────────────────────────────────────
+// We use a two-section format to avoid JSON escaping issues with HTML content.
+// Section 1: JSON metadata (no HTML fields)
+// Section 2: Raw HTML body (outside JSON, no escaping needed)
 
 function buildBlogPrompt(content, { audience, tone, keywords, notes }) {
-  return `TASK: Transform raw content into a JSON object for a fintech blog CMS.
-
-IMPORTANT: Your response must be ONLY a valid JSON object. No intro text, no explanation, no markdown fences. Start your response with { and end with }.
+  return `TASK: Transform raw content into a structured fintech blog post.
 
 Author context:
 - Target audience: ${audience || 'Fintech professionals'}
@@ -68,27 +69,35 @@ Author context:
 - Keywords to target: ${keywords || ''}
 - Additional notes: ${notes || 'none'}
 
-Required JSON fields:
-- title: string (compelling blog post title)
-- slug: string (url-friendly, lowercase, hyphens only)
-- seo_title: string (under 60 chars, include main keyword)
-- seo_description: string (under 160 chars, include keywords)
-- category: string (must be one of: AI Engineering, Fintech, Legacy Modernisation, AI Governance, Engineering)
-- author: string (use "FinSignal Editorial")
-- read_time: number (estimated minutes to read)
-- excerpt: string (2-3 sentences summarising the post)
-- tags: array of 4-5 keyword strings
-- toc: array of objects with id (slug) and title fields
-- body_html: string (full article as HTML, minimum 800 words, use h2 with id attributes matching toc ids, h3, p, ul, li, blockquote, strong. Add <div class='callout'> for key insights. IMPORTANT: use single quotes for all HTML attributes so the JSON stays valid)
+OUTPUT FORMAT — two sections, exactly as shown:
+
+<<<JSON
+{
+  "title": "...",
+  "slug": "url-friendly-lowercase-hyphens",
+  "seo_title": "under 60 chars with main keyword",
+  "seo_description": "under 160 chars with keywords",
+  "category": "one of: AI Engineering, Fintech, Legacy Modernisation, AI Governance, Engineering",
+  "author": "FinSignal Editorial",
+  "read_time": 5,
+  "excerpt": "2-3 sentence summary",
+  "tags": ["tag1", "tag2", "tag3", "tag4"],
+  "toc": [{"id": "section-slug", "title": "Section Title"}]
+}
+JSON>>>
+
+<<<HTML
+Full article HTML here — minimum 800 words.
+Use <h2 id="section-slug">, <h3>, <p>, <ul>, <li>, <blockquote>, <strong>.
+Add <div class="callout"> for key insights.
+HTML>>>
 
 Raw content to transform:
 ${content}`;
 }
 
 function buildCaseStudyPrompt(content, { clientType, outcome, keywords, notes }) {
-  return `TASK: Transform raw content into a JSON object for a fintech case study CMS.
-
-IMPORTANT: Your response must be ONLY a valid JSON object. No intro text, no explanation, no markdown fences. Start your response with { and end with }.
+  return `TASK: Transform raw content into a structured fintech case study.
 
 Author context:
 - Client type: ${clientType || 'Confidential'}
@@ -96,29 +105,72 @@ Author context:
 - Keywords to target: ${keywords || ''}
 - Additional notes: ${notes || 'none'}
 
-Required JSON fields:
-- title: string (outcome-focused headline)
-- slug: string (url-friendly, lowercase, hyphens only)
-- seo_title: string (under 60 chars)
-- seo_description: string (under 160 chars)
-- subtitle: string (one sentence: client + outcome)
-- client_name: string (e.g. European Neobank)
-- industry: string (e.g. Fintech, Banking, Payments)
-- service: string (primary service provided)
-- timeline: string (e.g. 8 weeks)
-- stats: array of objects with value (string) and label (string)
-- challenge_title: string
-- challenge_html: string (HTML paragraphs and lists describing the challenge)
-- solution_title: string
-- solution_html: string (HTML with full approach and solution details)
-- tech_stack: array of technology name strings
-- results_title: string
-- results_cards: array of objects with number (string) and label (string)
-- results_html: string (HTML narrative about results)
-- testimonial: object with quote (string or null) and attribution (string)
+OUTPUT FORMAT — two sections, exactly as shown:
+
+<<<JSON
+{
+  "title": "outcome-focused headline",
+  "slug": "url-friendly-lowercase-hyphens",
+  "seo_title": "under 60 chars",
+  "seo_description": "under 160 chars",
+  "subtitle": "one sentence: client + outcome",
+  "client_name": "e.g. European Neobank",
+  "industry": "e.g. Fintech, Banking, Payments",
+  "service": "primary service provided",
+  "timeline": "e.g. 8 weeks",
+  "stats": [{"value": "60%", "label": "Cost Reduction"}],
+  "challenge_title": "The Challenge",
+  "solution_title": "Our Approach",
+  "tech_stack": ["Tech1", "Tech2"],
+  "results_title": "The Results",
+  "results_cards": [{"number": "3x", "label": "Faster Deployments"}],
+  "testimonial": {"quote": "quote text or null", "attribution": "Name, Role"}
+}
+JSON>>>
+
+<<<CHALLENGE_HTML
+HTML for the challenge section — paragraphs and lists.
+CHALLENGE_HTML>>>
+
+<<<SOLUTION_HTML
+HTML for the solution section — full approach details.
+SOLUTION_HTML>>>
+
+<<<RESULTS_HTML
+HTML narrative about the results.
+RESULTS_HTML>>>
 
 Raw content to transform:
 ${content}`;
+}
+
+// ── PARSE GROQ RESPONSE ───────────────────────────────────────────────────────
+
+function parseGroqResponse(response, type) {
+  const extract = (tag) => {
+    const match = response.match(new RegExp(`<<<${tag}([\\s\\S]*?)${tag}>>>`));
+    return match ? match[1].trim() : '';
+  };
+
+  const jsonText = extract('JSON');
+  if (!jsonText) throw new Error('AI response missing JSON section');
+
+  let data;
+  try {
+    data = JSON.parse(jsonText);
+  } catch (e) {
+    throw new Error(`AI returned invalid JSON. Preview: "${jsonText.slice(0, 200)}"`);
+  }
+
+  if (type === 'blog') {
+    data.body_html = extract('HTML');
+  } else {
+    data.challenge_html = extract('CHALLENGE_HTML');
+    data.solution_html  = extract('SOLUTION_HTML');
+    data.results_html   = extract('RESULTS_HTML');
+  }
+
+  return data;
 }
 
 // ── UPLOAD TO STRAPI ──────────────────────────────────────────────────────────
@@ -175,25 +227,7 @@ app.post('/api/create', async (req, res) => {
 
     // Step 2: Call Groq
     const response = await askGroq(prompt);
-    const jsonText = response.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
-
-    let data;
-    try {
-      data = JSON.parse(jsonText);
-    } catch (e) {
-      // Try extracting just the outermost JSON object
-      const start = jsonText.indexOf('{');
-      const end   = jsonText.lastIndexOf('}');
-      if (start !== -1 && end !== -1) {
-        try {
-          data = JSON.parse(jsonText.slice(start, end + 1));
-        } catch (e2) {
-          throw new Error(`AI returned invalid JSON. Preview: "${jsonText.slice(0, 200)}"`);
-        }
-      } else {
-        throw new Error(`AI returned invalid JSON. Preview: "${jsonText.slice(0, 200)}"`);
-      }
-    }
+    const data = parseGroqResponse(response, type);
 
     // Step 3: Upload to Strapi
     const result = await uploadToStrapi(type, data);
